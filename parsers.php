@@ -339,64 +339,44 @@ class MarkupParsers {
     }
 
     /**
-     * Convert HTML to plain text
+     * Convert HTML to plain text - completely strip all markup
      */
     private static function htmlToPlainText($html) {
-        // Replace common HTML elements
-        $search = [
-            '/<h[1-6][^>]*>(.+?)<\/h[1-6]>/i',
-            '/<p[^>]*>(.+?)<\/p>/i',
-            '/<br\s*\/?>/i',
-            '/<li[^>]*>(.+?)<\/li>/i',
-            '/<blockquote[^>]*>(.+?)<\/blockquote>/is',
-            '/<pre[^>]*>(.+?)<\/pre>/is',
-            '/<code[^>]*>(.+?)<\/code>/i',
-            '/<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.+?)<\/a>/i',
-            '/<strong[^>]*>(.+?)<\/strong>/i',
-            '/<em[^>]*>(.+?)<\/em>/i',
-            '/<del[^>]*>(.+?)<\/del>/i',
-            '/<ins[^>]*>(.+?)<\/ins>/i',
-            '/<hr[^>]*>/i',
-            '/<table[^>]*>(.+?)<\/table>/is',
-            '/<tr[^>]*>(.+?)<\/tr>/is',
-            '/<td[^>]*>(.+?)<\/td>/i',
-            '/<th[^>]*>(.+?)<\/th>/i',
-            '/<script[^>]*>(.+?)<\/script>/is',
-            '/<style[^>]*>(.+?)<\/style>/is',
-            '/<[^>]+>/'
-        ];
-
-        $replace = [
-            "\n\n$1\n\n",
-            "\n\n$1\n\n",
-            "\n",
-            "\n* $1",
-            "\n> $1\n",
-            "\n\n$1\n\n",
-            "`$1`",
-            "$2 ($1)",
-            "**$1**",
-            "*$1*",
-            "~~$1~~",
-            "$1",
-            "\n----------------\n",
-            "\n\n[TABLE]\n$1\n[/TABLE]\n\n",
-            "\n$1",
-            " | $1",
-            " | $1",
-            '',
-            '',
-            ''
-        ];
-
-        $text = preg_replace($search, $replace, $html);
+        // Step 1: Remove script and style tags with their content
+        $text = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $html);
+        $text = preg_replace('/<style[^>]*>.*?<\/style>/is', '', $text);
         
-        // Clean up whitespace
-        $text = preg_replace('/\n{3,}/', "\n\n", $text);
-        $text = trim($text);
+        // Step 2: Convert block-level elements to newlines
+        $text = preg_replace('/<\/p>/i', "\n\n", $text);
+        $text = preg_replace('/<br\s*\/?>/i', "\n", $text);
+        $text = preg_replace('/<\/h[1-6]>/i', "\n\n", $text);
+        $text = preg_replace('/<\/div>/i', "\n", $text);
+        $text = preg_replace('/<\/li>/i', "\n", $text);
+        $text = preg_replace('/<\/tr>/i', "\n", $text);
+        $text = preg_replace('/<\/td>/i', " ", $text);
+        $text = preg_replace('/<\/th>/i', " ", $text);
+        $text = preg_replace('/<hr[^>]*>/i', "\n---\n", $text);
         
-        // Decode HTML entities
+        // Step 3: Convert list items with bullets
+        $text = preg_replace('/<li[^>]*>/i', "* ", $text);
+        
+        // Step 4: Convert links to text (show text only, not URL)
+        $text = preg_replace('/<a[^>]*>(.+?)<\/a>/i', '$1', $text);
+        
+        // Step 5: Remove all remaining HTML tags
+        $text = strip_tags($text);
+        
+        // Step 6: Decode HTML entities
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        // Step 7: Clean up whitespace - remove extra newlines and spaces
+        $text = preg_replace('/[ \t]+/', ' ', $text); // Replace multiple spaces/tabs with single space
+        $text = preg_replace('/\n{3,}/', "\n\n", $text); // Max 2 consecutive newlines
+        $text = preg_replace('/^[ \t]+/m', '', $text); // Remove leading whitespace on each line
+        $text = preg_replace('/[ \t]+$/m', '', $text); // Remove trailing whitespace on each line
+        
+        // Step 8: Final trim
+        $text = trim($text);
         
         return $text;
     }

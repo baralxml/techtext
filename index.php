@@ -482,9 +482,6 @@
                         <p class="text-sm text-gray-500 font-medium">Markup Language Converter</p>
                     </div>
                 </div>
-                <button id="menuBtn" class="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition">
-                    <i class="fas fa-bars text-gray-600 text-xl"></i>
-                </button>
             </div>
         </div>
     </header>
@@ -521,8 +518,8 @@
                             </label>
                             <div class="relative">
                                 <select id="outputFormat" class="input-field w-full px-4 py-3 rounded-xl text-gray-700 appearance-none cursor-pointer">
+                                    <option value="plaintext" selected>📄 Plain Text</option>
                                     <option value="richtext">✨ Rich Text (HTML)</option>
-                                    <option value="plaintext">📄 Plain Text</option>
                                     <option value="html">🧹 Clean HTML</option>
                                     <option value="json">⚙️ JSON</option>
                                 </select>
@@ -592,12 +589,12 @@
                             Output Preview
                         </h2>
                         <div class="flex items-center space-x-3 bg-gray-100 rounded-lg p-1">
-                            <button id="viewRawBtn" class="text-sm px-4 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-white transition-all duration-200 font-medium">
-                                <i class="fas fa-code mr-1"></i>Raw
-                            </button>
-                            <button id="viewPreviewBtn" class="text-sm px-4 py-2 rounded-md bg-white text-blue-600 shadow-sm font-medium">
-                                <i class="fas fa-eye mr-1"></i>Preview
-                            </button>
+                        <button id="viewRawBtn" class="text-sm px-4 py-2 rounded-md bg-white text-blue-600 shadow-sm font-medium">
+                            <i class="fas fa-code mr-1"></i>Source
+                        </button>
+                        <button id="viewPreviewBtn" class="text-sm px-4 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-white transition-all duration-200 font-medium">
+                            <i class="fas fa-eye mr-1"></i>Preview
+                        </button>
                         </div>
                     </div>
                     <div class="p-6">
@@ -701,19 +698,7 @@
                     </div>
                 </div>
 
-                <!-- Install PWA Card -->
-                <div id="installCard" class="glass-card rounded-2xl p-6 hidden animate-slide-up" style="animation-delay: 0.7s;">
-                    <h3 class="text-md font-bold text-gray-900 mb-3 flex items-center">
-                        <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-mobile-alt text-indigo-600"></i>
-                        </span>
-                        Install App
-                    </h3>
-                    <p class="text-sm text-gray-600 mb-4">Install TechText on your device for quick access anytime.</p>
-                    <button id="installBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center">
-                        <i class="fas fa-download mr-2"></i>Install Now
-                    </button>
-                </div>
+
             </div>
         </div>
     </main>
@@ -752,28 +737,7 @@
     <!-- Toast Container -->
     <div id="toast" class="toast"></div>
 
-    <!-- PWA Install Prompt (Mobile) -->
-    <div id="pwaPrompt" class="pwa-prompt">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mr-4">
-                    <i class="fas fa-file-code text-white text-xl"></i>
-                </div>
-                <div>
-                    <p class="font-bold text-gray-900">Install TechText</p>
-                    <p class="text-sm text-gray-500">Add to home screen for quick access</p>
-                </div>
-            </div>
-            <div class="flex space-x-3">
-                <button id="pwaDismiss" class="text-gray-500 hover:text-gray-700 px-4 py-2 font-medium">
-                    Later
-                </button>
-                <button id="pwaInstall" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold">
-                    Install
-                </button>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Application JavaScript -->
     <script src="app.js"></script>
@@ -793,76 +757,13 @@
             });
         }
 
-        // PWA Install Prompt
-        let deferredPrompt;
-        const installCard = document.getElementById('installCard');
-        const installBtn = document.getElementById('installBtn');
-        const pwaPrompt = document.getElementById('pwaPrompt');
-        const pwaInstall = document.getElementById('pwaInstall');
-        const pwaDismiss = document.getElementById('pwaDismiss');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installCard.classList.remove('hidden');
-            
-            // Show mobile prompt after 3 seconds
-            setTimeout(() => {
-                if (window.innerWidth < 768) {
-                    pwaPrompt.classList.add('show');
-                }
-            }, 3000);
-        });
-
-        function installPWA() {
-            if (!deferredPrompt) return;
-            
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('User accepted the install prompt');
-                    installCard.classList.add('hidden');
-                    pwaPrompt.classList.remove('show');
-                }
-                deferredPrompt = null;
-            });
-        }
-
-        installBtn.addEventListener('click', installPWA);
-        pwaInstall.addEventListener('click', installPWA);
-        pwaDismiss.addEventListener('click', () => {
-            pwaPrompt.classList.remove('show');
-        });
-
-        // Hide install card when app is installed
-        window.addEventListener('appinstalled', () => {
-            installCard.classList.add('hidden');
-            pwaPrompt.classList.remove('show');
-            deferredPrompt = null;
-            console.log('PWA was installed');
-        });
-
-        // PWA Debug Info
-        console.log('PWA Debug Info:');
-        console.log('- Service Worker supported:', 'serviceWorker' in navigator);
-        console.log('- Manifest link:', document.querySelector('link[rel="manifest"]')?.href);
-        console.log('- Protocol:', window.location.protocol);
-        console.log('- Is HTTPS:', window.location.protocol === 'https:');
+        // Simple PWA registration
+        console.log('[PWA] Service Worker supported:', 'serviceWorker' in navigator);
         
         // Check if app is already installed
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            console.log('App is running in standalone mode (already installed)');
-            installCard.classList.add('hidden');
+            console.log('[PWA] App running in standalone mode');
         }
-        
-        // Debug: Check manifest fetch
-        fetch('manifest.json')
-            .then(r => r.json())
-            .then(manifest => {
-                console.log('Manifest loaded:', manifest.name);
-                console.log('Manifest icons:', manifest.icons.length);
-            })
-            .catch(e => console.error('Manifest error:', e));
     </script>
 </body>
 </html>

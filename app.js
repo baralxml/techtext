@@ -38,8 +38,7 @@
         clearHistoryBtn: document.getElementById('clearHistoryBtn'),
         viewRawBtn: document.getElementById('viewRawBtn'),
         viewPreviewBtn: document.getElementById('viewPreviewBtn'),
-        fabConvert: document.getElementById('fabConvert'),
-        menuBtn: document.getElementById('menuBtn')
+        fabConvert: document.getElementById('fabConvert')
     };
 
     /**
@@ -248,18 +247,7 @@
                 }
             }
             
-            // Escape to close any modals or reset
-            if (e.key === 'Escape') {
-                elements.pwaPrompt.classList.remove('show');
-            }
         });
-
-        // Mobile menu (if needed in future)
-        if (elements.menuBtn) {
-            elements.menuBtn.addEventListener('click', () => {
-                showToast('Menu feature coming soon!', 'info');
-            });
-        }
 
         // Paste handling
         elements.inputContent.addEventListener('paste', (e) => {
@@ -367,6 +355,7 @@
     function displayOutput(output, format) {
         elements.outputPlaceholder.classList.add('hidden');
         
+        // Set content based on format
         if (format === 'json') {
             try {
                 const parsed = JSON.parse(output);
@@ -374,28 +363,31 @@
                 elements.outputPreview.innerHTML = parsed.html || output;
             } catch (e) {
                 elements.outputRaw.textContent = output;
-                elements.outputPreview.innerHTML = output;
+                elements.outputPreview.innerHTML = escapeHtml(output);
             }
         } else if (format === 'plaintext') {
+            // Plain text: show in raw textarea, wrap in preview for better display
             elements.outputRaw.textContent = output;
-            elements.outputPreview.innerHTML = escapeHtml(output).replace(/\n/g, '<br>');
+            // Use white-space: pre-wrap to preserve formatting
+            elements.outputPreview.innerHTML = '<div style="white-space: pre-wrap; font-family: monospace; line-height: 1.6;">' + escapeHtml(output) + '</div>';
         } else {
+            // Rich Text and HTML
             elements.outputRaw.textContent = output;
             elements.outputPreview.innerHTML = output;
-        }
-
-        // Apply syntax highlighting to code blocks
-        if (elements.outputPreview.querySelectorAll('pre code').length > 0) {
-            if (window.Prism) {
+            
+            // Apply syntax highlighting to code blocks for rich text
+            if (format === 'richtext' && elements.outputPreview.querySelectorAll('pre code').length > 0 && window.Prism) {
                 Prism.highlightAllUnder(elements.outputPreview);
             }
         }
 
-        // Show preview by default for rich text, raw for others
-        if (format === 'richtext') {
-            showOutputView('preview');
-        } else {
+        // Show appropriate view based on format
+        if (format === 'plaintext') {
+            // For plain text, show the source view by default
             showOutputView('raw');
+        } else {
+            // For HTML/richtext, show preview by default
+            showOutputView('preview');
         }
 
         // Add animation
