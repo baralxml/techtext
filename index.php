@@ -22,8 +22,8 @@
     
     <!-- Favicon & Icons -->
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-    <link rel="alternate icon" href="icons/icon-72x72.png">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="alternate icon" type="image/png" href="icons/icon.php?size=72">
+    <link rel="apple-touch-icon" href="icons/icon.php?size=192">
     <link rel="mask-icon" href="icons/icon.svg" color="#2563eb">
     
     <title>TechText - Markup Language Converter</title>
@@ -841,6 +841,28 @@
             deferredPrompt = null;
             console.log('PWA was installed');
         });
+
+        // PWA Debug Info
+        console.log('PWA Debug Info:');
+        console.log('- Service Worker supported:', 'serviceWorker' in navigator);
+        console.log('- Manifest link:', document.querySelector('link[rel="manifest"]')?.href);
+        console.log('- Protocol:', window.location.protocol);
+        console.log('- Is HTTPS:', window.location.protocol === 'https:');
+        
+        // Check if app is already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('App is running in standalone mode (already installed)');
+            installCard.classList.add('hidden');
+        }
+        
+        // Debug: Check manifest fetch
+        fetch('manifest.json')
+            .then(r => r.json())
+            .then(manifest => {
+                console.log('Manifest loaded:', manifest.name);
+                console.log('Manifest icons:', manifest.icons.length);
+            })
+            .catch(e => console.error('Manifest error:', e));
     </script>
 </body>
 </html>

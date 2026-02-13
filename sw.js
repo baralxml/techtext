@@ -1,35 +1,43 @@
-const CACHE_NAME = 'techtext-v1.0.0';
+const CACHE_NAME = 'techtext-v1.0.1';
 const STATIC_ASSETS = [
   './',
   './index.php',
   './app.js',
   './manifest.json',
   './offline.html',
-  './icons/icon.svg'
+  './icons/icon.svg',
+  './icons/icon.php?size=72',
+  './icons/icon.php?size=96',
+  './icons/icon.php?size=128',
+  './icons/icon.php?size=144',
+  './icons/icon.php?size=152',
+  './icons/icon.php?size=192',
+  './icons/icon.php?size=384',
+  './icons/icon.php?size=512'
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
+  console.log('[SW] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Service Worker: Caching static assets');
+        console.log('[SW] Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        console.log('Service Worker: Skip waiting');
+        console.log('[SW] Skip waiting');
         return self.skipWaiting();
       })
       .catch((error) => {
-        console.error('Service Worker: Cache failed', error);
+        console.error('[SW] Cache failed', error);
       })
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activating...');
+  console.log('[SW] Activating...');
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -37,13 +45,13 @@ self.addEventListener('activate', (event) => {
           cacheNames
             .filter((name) => name !== CACHE_NAME)
             .map((name) => {
-              console.log('Service Worker: Deleting old cache', name);
+              console.log('[SW] Deleting old cache', name);
               return caches.delete(name);
             })
         );
       })
       .then(() => {
-        console.log('Service Worker: Claiming clients');
+        console.log('[SW] Claiming clients');
         return self.clients.claim();
       })
   );
@@ -58,6 +66,11 @@ self.addEventListener('fetch', (event) => {
 
   // Skip API calls - always fetch fresh data
   if (event.request.url.includes('/api.php')) {
+    return;
+  }
+
+  // Skip icon.php requests - let them be generated dynamically
+  if (event.request.url.includes('icon.php')) {
     return;
   }
 
@@ -86,9 +99,10 @@ self.addEventListener('fetch', (event) => {
 
             return networkResponse;
           })
-          .catch(() => {
+          .catch((error) => {
+            console.error('[SW] Fetch failed:', error);
             // Return offline page if available for HTML requests
-            if (event.request.headers.get('accept').includes('text/html')) {
+            if (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html')) {
               return caches.match('./offline.html');
             }
           });
@@ -107,8 +121,8 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data.text(),
-    icon: './icons/icon-192x192.png',
-    badge: './icons/icon-72x72.png',
+    icon: './icons/icon.php?size=192',
+    badge: './icons/icon.php?size=72',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -118,12 +132,12 @@ self.addEventListener('push', (event) => {
       {
         action: 'convert',
         title: 'Convert',
-        icon: './icons/icon-96x96.png'
+        icon: './icons/icon.php?size=96'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: './icons/icon-96x96.png'
+        icon: './icons/icon.php?size=96'
       }
     ]
   };
@@ -144,7 +158,14 @@ self.addEventListener('notificationclick', (event) => {
   }
 });
 
-// Function to sync pending conversions (placeholder for future offline support)
+// Function to sync pending conversions
 async function syncPendingConversions() {
-  console.log('Syncing pending conversions...');
+  console.log('[SW] Syncing pending conversions...');
 }
+
+// Message handler from client
+self.addEventListener('message', (event) => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
