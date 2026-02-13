@@ -1,20 +1,16 @@
 const CACHE_NAME = 'techtext-v1.0.0';
 const STATIC_ASSETS = [
-  '/',
-  '/index.php',
-  '/app.js',
-  '/manifest.json',
-  '/check.php',
-  'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js'
+  './',
+  './index.php',
+  './app.js',
+  './manifest.json',
+  './offline.html',
+  './icons/icon.svg'
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
+  console.log('Service Worker: Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -22,6 +18,7 @@ self.addEventListener('install', (event) => {
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
+        console.log('Service Worker: Skip waiting');
         return self.skipWaiting();
       })
       .catch((error) => {
@@ -32,6 +29,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker: Activating...');
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -45,6 +43,7 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
+        console.log('Service Worker: Claiming clients');
         return self.clients.claim();
       })
   );
@@ -86,11 +85,13 @@ self.addEventListener('fetch', (event) => {
               });
 
             return networkResponse;
+          })
+          .catch(() => {
+            // Return offline page if available for HTML requests
+            if (event.request.headers.get('accept').includes('text/html')) {
+              return caches.match('./offline.html');
+            }
           });
-      })
-      .catch(() => {
-        // Return offline page if available
-        return caches.match('/index.php');
       })
   );
 });
@@ -106,8 +107,8 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data.text(),
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
+    icon: './icons/icon-192x192.png',
+    badge: './icons/icon-72x72.png',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -117,12 +118,12 @@ self.addEventListener('push', (event) => {
       {
         action: 'convert',
         title: 'Convert',
-        icon: '/icons/icon-96x96.png'
+        icon: './icons/icon-96x96.png'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/icons/icon-96x96.png'
+        icon: './icons/icon-96x96.png'
       }
     ]
   };
@@ -138,13 +139,12 @@ self.addEventListener('notificationclick', (event) => {
 
   if (event.action === 'convert') {
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow('./')
     );
   }
 });
 
 // Function to sync pending conversions (placeholder for future offline support)
 async function syncPendingConversions() {
-  // This would sync any queued conversions when back online
   console.log('Syncing pending conversions...');
 }

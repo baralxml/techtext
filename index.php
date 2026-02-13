@@ -482,14 +482,6 @@
                         <p class="text-sm text-gray-500 font-medium">Markup Language Converter</p>
                     </div>
                 </div>
-                <div class="text-right hidden sm:block">
-                    <p class="text-sm text-gray-600 font-medium">Built by <span class="text-blue-600 font-semibold">Santosh Baral</span></p>
-                    <p class="text-xs text-gray-400">
-                        <a href="https://techzeninc.com" target="_blank" class="hover:text-blue-600 transition-colors duration-200">
-                            Techzen Corporation
-                        </a>
-                    </p>
-                </div>
                 <button id="menuBtn" class="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition">
                     <i class="fas fa-bars text-gray-600 text-xl"></i>
                 </button>
@@ -727,19 +719,27 @@
     </main>
 
     <!-- Footer -->
-    <footer class="glass-card mt-8 mx-4 mb-4 rounded-2xl">
-        <div class="max-w-7xl mx-auto px-6 py-6">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <p class="text-sm text-gray-500">
-                    &copy; 2026 TechText. All rights reserved.
-                </p>
-                <p class="text-sm text-gray-500 mt-2 md:mt-0 flex items-center">
-                    Built with <i class="fas fa-heart text-red-500 mx-2 animate-pulse"></i> by 
-                    <span class="font-semibold text-gray-700 mx-1">Santosh Baral</span> | 
-                    <a href="https://techzeninc.com" target="_blank" class="text-blue-600 hover:text-blue-800 ml-1 font-medium hover:underline transition">
+    <footer class="glass-card mt-12 mx-4 mb-6 rounded-2xl border-t-4 border-blue-500">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <div class="text-center md:text-left">
+                    <p class="text-lg font-bold text-gray-800 mb-1">TechText</p>
+                    <p class="text-sm text-gray-500">
+                        &copy; 2026 All rights reserved.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm text-gray-600 mb-2">Built by</p>
+                    <p class="text-lg font-bold text-blue-600">Santosh Baral</p>
+                    <a href="https://techzeninc.com" target="_blank" class="text-sm text-gray-500 hover:text-blue-600 transition font-medium">
                         Techzen Corporation
                     </a>
-                </p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-sm text-gray-500">
+                        Made with <i class="fas fa-heart text-red-500 mx-1 animate-pulse"></i> for developers
+                    </p>
+                </div>
             </div>
         </div>
     </footer>

@@ -410,8 +410,10 @@ class MarkupParsers {
         
         $html = strip_tags($html, $allowedTags);
         
-        // Clean attributes
-        $html = preg_replace('/<(\w+)([^>]*)>/e', "self::cleanAttributes('<$1', '$2')>", $html);
+        // Clean attributes using preg_replace_callback instead of deprecated /e modifier
+        $html = preg_replace_callback('/<(\w+)([^>]*)>/', function($matches) {
+            return self::cleanAttributes('<' . $matches[1], $matches[2]) . '>';
+        }, $html);
         
         return $html;
     }
